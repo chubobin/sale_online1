@@ -37,7 +37,7 @@
 	function diplay_form_submit(){
 		var formdata=$("#dislay_form").serialize();
 		var order = $("#display_order_input").val();
-		alert(formdata);
+		alert(order);
 		$.ajax({
 			url:"get_sku_by_class_2_id_attr/${class_2_id}/"+order+".do",
 			data:formdata,
@@ -143,7 +143,7 @@
 	</div>
 	<div class="Sscreen">
 	<form id="dislay_form">
-	
+	<input id="display_order_input" value="order by jg"/>
 	<div id="display_div" class="list">
 		<span>导航：</span>
 		

@@ -1,8 +1,10 @@
 package com.chubobin.trade.controller;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -14,6 +16,10 @@ import com.chubobin.trade.bean.OBJECT_T_MALL_SKU;
 import com.chubobin.trade.bean.OBJECT_T_MALL_SKU_ATTR_VALUE;
 import com.chubobin.trade.bean.T_MALL_SKU;
 import com.chubobin.trade.service.SkuService;
+import com.chubobin.trade.util.MyJedisTool;
+import com.chubobin.trade.util.Myutils;
+
+import redis.clients.jedis.Jedis;
 
 @Controller
 public class SkuController {
@@ -25,11 +31,23 @@ public class SkuController {
 	public String index_select_attr_sku(@PathVariable("class_2_id")int class_2_id,@PathVariable("flmch2") String flmch2,@PathVariable("order") String order,Map map){
 		//获取属性信息
 		List<OBJECT_T_MALL_ATTR> listattr=skuService.index_select_attr_sku(class_2_id);
-		
-		List<OBJECT_T_MALL_SKU> skulist=skuService.get_sku_by_class_2_id_attr(class_2_id,null,order);
-		
+		List<OBJECT_T_MALL_SKU> list_sku_redis=new ArrayList<>();
+		Jedis get_Jedis = MyJedisTool.get_Jedis();
+		String key="class_2_id_"+class_2_id;
+		Set<String> zrange = get_Jedis.zrange(key,0,-1);
+		if(zrange!=null||zrange.size()>0){
+			Iterator<String> iterator = zrange.iterator();
+			while(iterator.hasNext()){
+				String next = iterator.next();
+				OBJECT_T_MALL_SKU single_object = Myutils.String_to_single_object(next, OBJECT_T_MALL_SKU.class);
+				list_sku_redis.add(single_object);
+				
+			}
+		}else{
+			 list_sku_redis=skuService.get_sku_by_class_2_id_attr(class_2_id,null,order);
+		}
 		map.put("listattr", listattr);
-		map.put("skulist", skulist);
+		map.put("skulist", list_sku_redis);
 		return "sku_display";
 	}
 	//根据分类属性查询sku的信息
