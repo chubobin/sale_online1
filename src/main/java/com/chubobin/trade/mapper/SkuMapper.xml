@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper SYSTEM "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.chubobin.trade.mapper.SkuMapper">
+  	<select id="select_sku_by_spu" resultType="com.chubobin.trade.bean.T_MALL_SKU">
+  		select * from t_mall_sku sku
+  		where sku.shp_id=#{shp_id}
+  	</select>
+  	<select id="select_sku_by_sku_id" parameterType="Map" resultMap="select_sku_by_sku_id_map">
+ 		select sku.id id,spu.*,sku.*,spu.id spu_id,image.id image_id,image.*,attr.shxm_mch attr_name,CONCAT(val.shxzh,val.shxzh_mch) attr_value from 
+		t_mall_product spu,t_mall_sku sku,
+		t_mall_attr attr,t_mall_value val,t_mall_sku_attr_value attr_value,
+		t_mall_trade_mark tm,
+		t_mall_product_image image
+		where 
+		sku.Id = attr_value.sku_id
+		and
+		attr_value.shxm_id = attr.Id
+		and
+		attr_value.shxzh_id = val.Id
+		AND
+		sku.shp_id = spu.Id
+		and
+		spu.id=image.shp_id
+		and
+		spu.pp_id = tm.Id
+		and sku.id=#{sku_id}
+	
+ 	</select>
+ 	<resultMap type="com.chubobin.trade.bean.OBJECT_T_MALL_SKU" id="select_sku_by_sku_id_map" autoMapping="true">
+ 		<result column="id" property="id"/>
+ 		<result column="spu_id" property="shp_id"/>
+ 		<association property="product" autoMapping="true" javaType="com.chubobin.trade.bean.T_MALL_PRODUCT">
+ 			<result column="spu_id" property="id"/>
+ 		</association>
+ 		<association property="tm" autoMapping="true" javaType="com.chubobin.trade.bean.T_MALL_TRADE_MARK">
+ 			<result column="tm_id" property="id"/>
+ 		</association>
+ 		 <collection property="list_attr_value" autoMapping="true" ofType="com.chubobin.trade.bean.OBJECT_ATTR_VALUE">
+ 		</collection> 
+ 		 <collection property="list_image" autoMapping="true" ofType="com.chubobin.trade.bean.T_MALL_PRODUCT_IMAGE">
+ 		 	<result column="image_id" property="id"/>
+ 		 </collection>
+ 	</resultMap>
+  	<select id="select_attr_sku" resultMap="select_attr_sku_map">
+  		select attr.*,val.*,attr.id attrid,val.id valid from t_mall_attr attr,t_mall_value val
+  		where attr.id=val.shxm_id 
+  		and flbh2=#{class_2_id}
+  	</select>
+  	<resultMap type="com.chubobin.trade.bean.OBJECT_T_MALL_ATTR" id="select_attr_sku_map" autoMapping="true">
+ 		<result column="attrid" property="id"/>
+ 		<collection property="valuelist" ofType="com.chubobin.trade.bean.T_MALL_VALUE" autoMapping="true">
+ 			<result column="valid" property="id"/>
+ 		</collection>
+ 	</resultMap>
+ 	<select id="select_sku_by_class_2_id_attr" parameterType="Map" resultMap="select_sku_by_class_2_id_attr_map">
+ 		select sku.*,spu.*,tm.*,sku.id id,spu.id spu_id,tm.id tm_id from 
+		t_mall_product spu,t_mall_sku sku,
+		t_mall_attr attr,t_mall_value val,t_mall_sku_attr_value attr_value,
+		t_mall_trade_mark tm
+		where 
+		sku.Id = attr_value.sku_id
+		and
+		attr_value.shxm_id = attr.Id
+		and
+		attr_value.shxzh_id = val.Id
+		AND
+		sku.shp_id = spu.Id
+		and
+		spu.pp_id = tm.Id
+		and spu.flbh2=#{class_2_id}
+		${sql}
+		${order}
+ 	</select>
+ 	<resultMap type="com.chubobin.trade.bean.OBJECT_T_MALL_SKU" id="select_sku_by_class_2_id_attr_map" autoMapping="true">
+ 		<result column="id" property="id"/>
+ 		<result column="spu_id" property="shp_id"/>
+ 		<association property="product" autoMapping="true" javaType="com.chubobin.trade.bean.T_MALL_PRODUCT">
+ 			<result column="spu_id" property="id"/>
+ 		</association>
+ 		<association property="tm" autoMapping="true" javaType="com.chubobin.trade.bean.T_MALL_TRADE_MARK">
+ 			<result column="tm_id" property="id"/>
+ 		</association>
+ 	</resultMap>
+ 	<select id="select_sku_by_class_2_id" resultMap="select_sku_by_class_2_id_map">
+ 		select sku.*,spu.*,tm.*,sku.id id,spu.id spu_id,tm.id tm_id from 
+		t_mall_sku sku,
+		t_mall_product spu,
+		t_mall_trade_mark tm,
+		t_mall_tm_class tm_class,
+		t_mall_class_1 class1
+		where sku.shp_id=spu.Id
+		and spu.pp_id=tm.Id
+		and tm.Id=tm_class.pp_id
+		and class1.Id=tm_class.flbh1
+		and spu.flbh1=class1.Id
+		and spu.flbh2=#{class_2_id}
+		order by sku.jg
+ 	</select>
+ 	<resultMap type="com.chubobin.trade.bean.OBJECT_T_MALL_SKU" id="select_sku_by_class_2_id_map" autoMapping="true">
+ 		<result column="id" property="id"/>
+ 		<result column="spu_id" property="shp_id"/>
+ 		<association property="product" autoMapping="true" javaType="com.chubobin.trade.bean.T_MALL_PRODUCT">
+ 			<result column="spu_id" property="id"/>
+ 		</association>
+ 		<association property="tm" autoMapping="true" javaType="com.chubobin.trade.bean.T_MALL_TRADE_MARK">
+ 			<result column="tm_id" property="id"/>
+ 		</association>
+ 	</resultMap>
+ 	<update id="text">
+ 	update t_mall_user_account
+ 	set yh_mm=22
+ 	where id=9
+ 	</update>
+</mapper>

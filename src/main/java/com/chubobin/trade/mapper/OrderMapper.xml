@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper SYSTEM "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.chubobin.trade.mapper.OrderMapper">
+	
+	<insert id="inset_order" useGeneratedKeys="true" keyColumn="id" keyProperty="id" >
+		
+		insert into t_mall_order(
+		shhr,
+		zje,
+		jdh,
+		yh_id,
+		dzh_id,
+		dzh_mch
+		)
+		values(
+		#{shhr},
+		#{zje},
+		#{jdh},
+		#{yh_id},
+		#{dzh_id},
+		#{dzh_mch}
+		)
+	</insert>
+	<insert id="insert_order_info" parameterType="list">
+		
+		insert into t_mall_order_info(
+		dd_id,
+		sku_id,
+		sku_mch,
+		shp_tp,
+		sku_jg,
+		sku_shl,
+		sku_kcdz,
+		gwch_id
+		) values
+		<foreach collection="list" item="info" separator=",">
+		(
+		#{info.dd_id},
+		#{info.sku_id},
+		#{info.sku_mch},
+		#{info.shp_tp},
+		#{info.sku_jg},
+		#{info.sku_shl},
+		#{info.sku_kcdz},
+		#{info.gwch_id}
+		)
+		</foreach>
+	</insert>
+	<insert id="insert_flow">
+		insert into t_mall_flow(
+		psmsh,
+		yh_id,
+		dd_id,
+		mqdd,
+		mdd
+		) values(
+		#{psmsh},
+		#{yh_id},
+		#{dd_id},
+		#{mqdd},
+		#{mdd}
+		)
+	</insert>
+	<delete id="delete_shoppingcart_by_id" parameterType="list">
+		delete from t_mall_shoppingcar
+		where id in(
+		<foreach collection="list" item="id" separator=",">
+		#{id}
+		</foreach>
+		)
+	</delete>
+	<update id="update_order">
+		update t_mall_order 
+		<set>
+		<if test="yjsdshj!=null">
+			yjsdshj=#{yjsdshj},
+		</if>
+		<if test="jdh!=0">
+			jdh=#{jdh},
+		</if>
+		</set>
+		where id=#{id}
+	</update>
+	<update id="update_flow">
+		update t_mall_flow 
+		<set>
+		<if test="psshj!=null">
+			psshj=#{psshj},	
+		</if>
+		<if test="mqdd!=null">
+			mqdd=#{mqdd},
+		</if>
+		<if test="ywy!=null">
+			ywy=#{ywy},
+		</if>
+		<if test="lxfsh!=null">
+			lxfsh=#{lxfsh},
+		</if>
+		<if test="psmsh!=null">
+			psmsh=#{psmsh},
+		</if>
+		<if test="dd_id!=0">
+			dd_id=#{dd_id}
+		</if>
+		</set>
+	</update>
+	<select id="select_kc_for_update" resultType="int">
+		select sku_xl from t_mall_sku 
+		where id=#{sku_id} for update
+	</select>
+	<update id="update_xl_by_sku_id">
+		update t_mall_sku 
+		set kc=kc-#{gmshl},sku_xl=sku_xl+#{gmshl}
+		where id=#{id}
+	</update>
+</mapper>
