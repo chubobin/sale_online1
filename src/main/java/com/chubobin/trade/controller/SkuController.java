@@ -15,6 +15,7 @@ import com.chubobin.trade.bean.OBJECT_T_MALL_ATTR;
 import com.chubobin.trade.bean.OBJECT_T_MALL_SKU;
 import com.chubobin.trade.bean.OBJECT_T_MALL_SKU_ATTR_VALUE;
 import com.chubobin.trade.bean.T_MALL_SKU;
+import com.chubobin.trade.bean.T_MALL_SKU_ATTR_VALUE;
 import com.chubobin.trade.service.SkuService;
 import com.chubobin.trade.util.MyJedisTool;
 import com.chubobin.trade.util.Myutils;
@@ -45,6 +46,7 @@ public class SkuController {
 			}
 		}else{
 			 list_sku_redis=skuService.get_sku_by_class_2_id_attr(class_2_id,null,order);
+			 //同步reids
 		}
 		map.put("listattr", listattr);
 		map.put("skulist", list_sku_redis);
@@ -54,7 +56,29 @@ public class SkuController {
 	@RequestMapping("/get_sku_by_class_2_id_attr/{class_2_id}/{order}")
 	public String get_sku_by_class_2_id_attr(@PathVariable("class_2_id") int class_2_id,@PathVariable("order") String order,OBJECT_T_MALL_SKU_ATTR_VALUE attrlist,Map map){
 		List<OBJECT_T_MALL_SKU> skulist=new ArrayList<>();
+		List<T_MALL_SKU_ATTR_VALUE> attr_value_list=attrlist.getAttrlist();
+		Jedis jedis = MyJedisTool.get_Jedis();
+		String[] keys=new String[attr_value_list.size()];
+		String key_merge="z_inter";
+		for (int i = 0; i < attr_value_list.size(); i++) {
+			String key="class_2_id_"+class_2_id+"_attr_value_"+attr_value_list.get(i).getShxm_id()+"_"+attr_value_list.get(i).getShxzh_id();
+			key_merge+=key;
+			keys[i]=key;
+		}
+		//交叉检索生成新key-value
+		jedis.zinterstore(key_merge, keys);
+		Set<String> zrange = jedis.zrange(key_merge,0,-1);
+		if(zrange!=null&&zrange.size()>0){
+			Iterator<String> iterator = zrange.iterator();
+			while(iterator.hasNext()){
+				String next = iterator.next();
+				OBJECT_T_MALL_SKU string_to_single_object = Myutils.String_to_single_object(next, OBJECT_T_MALL_SKU.class);
+				skulist.add(string_to_single_object);	
+			}
+		}else{
 		skulist=skuService.get_sku_by_class_2_id_attr(class_2_id,attrlist,order);
+		//同步redis
+		}
 		map.put("skulist", skulist);
 		return "sku_display_inner";
 	}
