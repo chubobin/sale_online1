@@ -131,6 +131,7 @@ public class ShoppingCartController {
 			//用户已经登录
 			if(list_cart_session==null||list_cart_session.size()==0){
 				//数据库中没有数据就向数据库中插入一条数据
+				//我要试试git好不好使
 				cart.setYh_id(user.getId());
 				cart.setHj(new BigDecimal(cart.getTjshl()).multiply(cart.getSku_jg()));
 				shoppingCartService.save_cart_data(cart);

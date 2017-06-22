@@ -1,5 +1,7 @@
 package com.chubobin.trade.controller;
 
+import org.apache.log4j.Logger;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -24,6 +26,11 @@ import redis.clients.jedis.Jedis;
 
 @Controller
 public class SkuController {
+	/**
+	* Logger for this class
+	*/
+	private static final Logger logger = Logger.getLogger(SkuController.class);
+	
 	
 	@Autowired
 	private SkuService skuService;
@@ -89,9 +96,12 @@ public class SkuController {
 		List<T_MALL_SKU> skulist=null;
 		if(shp_id!=0){
 		 skulist=skuService.get_sku_by_spu(shp_id);
+		 logger.debug("----ingorf");
 		}
 		map.put("details", details);
 		map.put("skulist", skulist);
+		
 		return "sku_details";
 	}
 }
+
