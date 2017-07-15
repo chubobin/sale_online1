@@ -22,6 +22,8 @@ public class IndexController {
 				}
 			}
 		}*/
+		//这就是测试远端的代码
+		//123123123123123
 		return "index";
 	}
 }
